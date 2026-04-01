@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %} - New Post{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-5">
+    <div class="row justify-content-center mt-5">
+        <div class="col-lg-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Create a new post</h4>
+                </div>
+                <div class="card-body">
+                    <form action="/create_post" method="post">
+                        {# Vulnerable version: no CSRF protection #}
+                        {# Add the following line to fix CSRF vulnerability: #}
+                        {# <input type="hidden" name="csrf_token" value="{{ csrf_token }}"> #}
+                        <div class="form-group position-relative">
+                            <label for="content">Post content</label>
+                            <textarea class="form-control" name="content" id="content" rows="5"
+                                      placeholder="Write your post here"></textarea>
+                            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10;">
+                                <div id="spinner" class="spinner-border text-primary" role="status" style="display: none;">
+                                    <span class="sr-only">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <button type="button" class="btn btn-primary" id="generate-ai">
+                                Generate with AI
+                            </button>
+                            <button type="submit" class="btn btn-primary ml-2">Create</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search); 
+        const content = urlParams.get('content');
+        if (content) {
+            document.getElementById('content').value = content;
+        }
+    });
+
+    document.getElementById('generate-ai').addEventListener('click', async () => {
+        const userInput = prompt("Enter a topic for the post:");
+        if (!userInput) return;
+
+        const button = document.getElementById('generate-ai');
+        const spinner = document.getElementById('spinner');
+        const textarea = document.getElementById('content');
+
+        button.disabled = true;
+        spinner.style.display = 'inline-block';
+        textarea.style.opacity = '0.5';
+        textarea.placeholder = "Sit tight — the AI is crafting your post...";
+
+        try {
+            const response = await fetch('/generate_post', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: userInput })
+            });
+
+            const data = await response.json();
+            if (data.content) {
+                textarea.value = data.content;
+            } else {
+                alert("Failed to generate content.");
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            alert("An error occurred while generating content.");
+        } finally {
+            button.disabled = false;
+            spinner.style.display = 'none';
+            textarea.style.opacity = '1';
+            textarea.placeholder = "Write your post here";
+        }
+    });
+</script>
+{% endblock %}

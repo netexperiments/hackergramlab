@@ -1,0 +1,9 @@
+Flask
+flask-cors
+flask_mysqldb
+werkzeug
+lxml
+flask-pymongo
+flask-wtf
+requests
+pymongo

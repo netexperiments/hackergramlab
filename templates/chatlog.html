@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %} - Chat Log{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white h4">🧠 Your Chat Messages</div>
+                <div class="card-body bg-light">
+                    <form action="/chatlog" method="get">
+                        <div class="form-group row mx-sm-3 mb-4">
+                            <div class="col">
+                                <input type="text" class="form-control" id="search" name="search" placeholder="Search by words">
+                            </div>
+                            <div class="col-auto">
+                                <button type="submit" class="btn btn-primary">Search</button>
+                            </div>
+                        </div>
+                    </form>
+                    {% autoescape false %}
+                    {% if chatlogs %}
+                        <ul class="list-group">
+                            {% for chat in chatlogs %}
+                                <li class="list-group-item bg-light my-3 rounded shadow-sm">
+                                    <div class="mb-2 text-right">
+                                        <div class="text-white font-weight-bold small">👤 {{ chat.user or 'Unknown' }}</div>
+                                        <div class="chat-bubble user-bubble">
+                                            {{ chat.prompt }}
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <div class="text-white font-weight-bold small">🤖 LLM</div>
+                                            <div class="chat-bubble llm-bubble">
+                                                {{ chat.response }}
+                                            </div>
+                                        </div>
+                                        <form action="/delete_chat" method="post" class="mb-0 ml-3 align-self-end">
+                                            <input type="hidden" name="chat_id" value="{{ chat._id }}">
+                                            <button type="submit" class="btn btn-primary">Delete</button>
+                                        </form>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-center">No chat logs found.</p>
+                    {% endif %}
+                    {% endautoescape %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

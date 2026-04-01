@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %} - Search Messages{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid mt-5">
+    <div class="row justify-content-center mt-5">
+        <div class="col-lg-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Search Messages</h4>
+                </div>
+                <div class="card-body">
+                    <form action="/messages" method="get">
+                        <div class="form-group row mx-sm-3 mb-2">
+                            <div class="col">
+                                <input type="text" class="form-control" id="search" name="search" placeholder="Search by content">
+                            </div>
+                            <div class="col-auto">
+                                <button type="submit" class="btn btn-primary">Search</button>
+                            </div>
+                        </div>
+                    </form>
+                    {% if search %}
+                        {% if messages|length > 1 or messages|length == 0 %}
+                            <h6>{{ messages|length }} matches for "{{ search }}"</h6>
+                        {% else %}
+                            <h6>1 match for "{{ search }}"</h6>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="row justify-content-center mt-4 mb-4">
+        <div class="col-lg-6">
+            {% autoescape false %}
+            {% for m in messages %}
+                <div class="card mb-3 shadow">
+                    <div class="card-header bg-primary text-white fw-bold h5 d-flex justify-content-between">
+                        <span>From: {{ m.sender }}</span>
+                        <span>To: {{ m.recipient }}</span>
+                    </div>
+                    <div class="card-body bg-secondary">
+                    <div class="d-flex justify-content-between">
+                        <small>Date: {{ m.timestamp.strftime('%d-%m-%Y') }}</small>
+                        <small>Time: {{ m.timestamp.strftime('%H:%M') }}</small>
+                    </div>
+                    <p class="card-text">{{ m.message }}</p>
+                    </div>
+                </div>
+            {% endfor %}
+            {% endautoescape %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

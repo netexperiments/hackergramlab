@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+{% block title %} - Admin Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid mt-5">
+    <div class="row justify-content-center mt-5">
+        <div class="col-lg-10">
+            <div class="card shadow">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">🛡️ Admin Dashboard</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Navigation Tabs -->
+                    <ul class="nav nav-tabs" id="adminTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link {% if not active_tab or active_tab == 'overview' %}active{% endif %}" 
+                               href="{{ url_for('admin_dashboard') }}">Overview</a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link {% if active_tab == 'users' %}active{% endif %}" 
+                               href="{{ url_for('admin_users') }}">User Management</a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link {% if active_tab == 'posts' %}active{% endif %}" 
+                               href="{{ url_for('admin_posts') }}">Post Management</a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link {% if active_tab == 'stats' %}active{% endif %}" 
+                               href="{{ url_for('admin_stats') }}">Statistics</a>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content mt-4" id="adminTabContent">
+                        
+                        <!-- Overview Tab -->
+                        {% if not active_tab or active_tab == 'overview' %}
+                        <div class="tab-pane fade show active">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="card bg-primary text-white">
+                                        <div class="card-body">
+                                            <h5>👥 Users</h5>
+                                            <h2>{{ user_count if user_count is defined else 0 }}</h2>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card bg-success text-white">
+                                        <div class="card-body">
+                                            <h5>📝 Posts</h5>
+                                            <h2>{{ post_count if post_count is defined else 0 }}</h2>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card bg-info text-white">
+                                        <div class="card-body">
+                                            <h5>🎯 Quick Actions</h5>
+                                            <a href="{{ url_for('admin_users') }}" class="btn btn-light btn-sm">Manage Users</a>
+                                            <a href="{{ url_for('admin_posts') }}" class="btn btn-light btn-sm">Manage Posts</a>
+                                            <a href="{{ url_for('admin_stats') }}" class="btn btn-light btn-sm">View Stats</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- User Management Tab -->
+                        {% if active_tab == 'users' %}
+                        <div class="tab-pane fade show active">
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <h5>👥 User Management</h5>
+                                    <!-- Search Users -->
+                                    <form action="{{ url_for('admin_users') }}" method="get" class="mb-3">
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" name="search" 
+                                                   value="{{ search if search else '' }}" placeholder="Search users...">
+                                            <button class="btn btn-primary" type="submit">Search</button>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5>➕ Add New User</h5>
+                                    <!-- Add User Form -->
+                                    <form action="{{ url_for('admin_users') }}" method="post">
+                                        <div class="row">
+                                            <div class="col">
+                                                <input type="text" class="form-control" name="username" placeholder="Username" required>
+                                            </div>
+                                            <div class="col">
+                                                <input type="text" class="form-control" name="name" placeholder="Full Name" required>
+                                            </div>
+                                            <div class="col">
+                                                <input type="password" class="form-control" name="password" placeholder="Password" required>
+                                            </div>
+                                            <div class="col-auto">
+                                                <button type="submit" class="btn btn-success">Add User</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- Users Table -->
+                            {% if users is defined %}
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Photo</th>
+                                            <th>Username</th>
+                                            <th>Name</th>
+                                            <th>Bio</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for user in users %}
+                                        <tr>
+                                            <td>
+                                            <img src="{{ url_for('static', filename='photos/' + (user.photo if user.photo else 'default.jpg')) }}" alt="" width="40" height="40" class="rounded-circle">
+                                            </td>
+                                            <td>@{{ user.username }}</td>
+                                            <td>{{ user.name }}</td>
+                                            <td>{{ user.bio[:50] + '...' if user.bio and user.bio|length > 50 else user.bio }}</td>
+                                            <td>
+                                                <a href="{{ url_for('profile') }}?username={{ user.username }}" class="btn btn-sm btn-info">View</a>
+                                                {% if user.username != 'admin' %}
+                                                <form method="post" action="{{ url_for('admin_delete_user') }}" style="display: inline;">
+                                                    <input type="hidden" name="username" value="{{ user.username }}">
+                                                    <button type="submit" class="btn btn-sm btn-danger" 
+                                                            onclick="return confirm('Are you sure you want to delete @{{ user.username }}?')">Delete</button>
+                                                </form>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p class="text-muted">Found {{ users|length }} user(s){% if search %} for "{{ search }}"{% endif %}</p>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Post Management Tab -->
+                        {% if active_tab == 'posts' %}
+                        <div class="tab-pane fade show active">
+                            <div class="row mb-4">
+                                <div class="col-md-12">
+                                    <h5>📝 Post Management</h5>
+                                    <!-- Search Posts -->
+                                    <form action="{{ url_for('admin_posts') }}" method="get" class="mb-3">
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" name="search" 
+                                                   value="{{ search if search else '' }}" placeholder="Search posts...">
+                                            <button class="btn btn-primary" type="submit">Search</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- Posts Table -->
+                            {% if posts is defined %}
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Author</th>
+                                            <th>Content</th>
+                                            <th>Posted At</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for post in posts %}
+                                        <tr>
+                                            <td>{{ post.id }}</td>
+                                            <td>
+                                                <img src="{{ photos_folder + (post.photo if post.photo else 'default.jpg') }}" alt="" width="30" height="30" class="rounded-circle">
+                                                @{{ post.author }}
+                                            </td>
+                                            <td>
+                                                <div style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                                    {{ post.content }}
+                                                </div>
+                                            </td>
+                                            <td>{{ post.posted_at }}</td>
+                                            <td>
+                                                <form method="post" action="{{ url_for('admin_delete_post') }}" style="display: inline;">
+                                                    <input type="hidden" name="post_id" value="{{ post.id }}">
+                                                    <button type="submit" class="btn btn-sm btn-danger" 
+                                                            onclick="return confirm('Are you sure you want to delete this post?')">Delete</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p class="text-muted">Found {{ posts|length }} post(s){% if search %} for "{{ search }}"{% endif %}</p>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Statistics Tab -->
+                        {% if active_tab == 'stats' %}
+                        <div class="tab-pane fade show active">
+                            <h5>📊 System Statistics</h5>
+                            {% if stats is defined %}
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="card border-primary">
+                                        <div class="card-body text-center">
+                                            <h1 class="text-primary">{{ stats.users }}</h1>
+                                            <h6>Total Users</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card border-success">
+                                        <div class="card-body text-center">
+                                            <h1 class="text-success">{{ stats.posts }}</h1>
+                                            <h6>Total Posts</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card border-info">
+                                        <div class="card-body text-center">
+                                            <h1 class="text-info">{{ stats.friendships }}</h1>
+                                            <h6>Total Friendships</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card border-warning">
+                                        <div class="card-body text-center">
+                                            <h1 class="text-warning">{{ stats.pending_requests }}</h1>
+                                            <h6>Pending Requests</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %} 
