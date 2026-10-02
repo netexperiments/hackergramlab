@@ -148,11 +148,13 @@ If you use Hackergram in your research, please cite it:
 
 ```bibtex
 @software{hackergram2026,
-  author  = {Pimentel, João and Valadas, Rui and Domingues, Tiago},
-  title   = {Hackergram: An Open-Source Platform for Classical and LLM-Driven Web Security Experimentation},
-  year    = {2026},
-  version = {1.0},
-  url     = {https://github.com/netexperiments/hackergramlab}
+  author    = {Pimentel, João and Valadas, Rui and Domingues, Tiago},
+  title     = {Hackergram: An Open-Source Platform for Classical and LLM-Driven Web Security Experimentation},
+  year      = {2026},
+  version   = {1.0},
+  publisher = {Zenodo},
+  doi       = {10.5281/zenodo.22966304},
+  url       = {https://doi.org/10.5281/zenodo.22966304}
 }
 ```
 
